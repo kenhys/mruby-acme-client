@@ -4,10 +4,18 @@
 #define OSSL_PKEY
 void Init_ossl_rsa(mrb_state *mrb);
 
-#define GetPKeyRSA(obj, pkey)                                                                 \
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#define EVP_PKEY_TYPE(pkey) EVP_PKEY_type((pkey)->type)
+#define EVP_PKEY_get0_RSA(pkey) pkey->pkey.rsa
+#else
+#define EVP_PKEY_TYPE(pkey) EVP_PKEY_base_id((pkey))
+#endif
+
+
+#define GetPKeyRSA(obj, pkey)                    \
   do {                                                                                             \
     GetPKey((obj), (pkey));                                                                 \
-    if (EVP_PKEY_type((pkey)->type) != EVP_PKEY_RSA) { /* PARANOIA? */                             \
+    if (EVP_PKEY_TYPE(pkey) != EVP_PKEY_RSA) { /* PARANOIA? */                                     \
       mrb_raise(mrb, E_RUNTIME_ERROR, "THIS IS NOT A RSA!");                                            \
     }                                                                                              \
   } while (0)

@@ -151,7 +151,7 @@ mrb_value ossl_rsa_new(mrb_state *mrb, EVP_PKEY *pkey)
     obj = rsa_instance(mrb, cRSA, RSA_new());
   } else {
     obj = NewPKey(mrb_class_get(mrb, "OpenSSL::PKey::RSA"));
-    if (EVP_PKEY_type(pkey->type) != EVP_PKEY_RSA) {
+    if (EVP_PKEY_TYPE(pkey) != EVP_PKEY_RSA) {
       mrb_raise(mrb, E_TYPE_ERROR, "Not a RSA key!");
     }
     SetPKey(obj, pkey);
@@ -171,7 +171,7 @@ static mrb_value mrb_ossl_pkey_rsa_public_key(mrb_state *mrb, mrb_value self)
 
   GetPKeyRSA(self, pkey);
 
-  rsa = RSAPublicKey_dup(pkey->pkey.rsa);
+  rsa = RSAPublicKey_dup(EVP_PKEY_get0_RSA(pkey));
   obj = rsa_instance(mrb, mrb_class(mrb, self), rsa);
 
   if (mrb_nil_p(obj)) {
@@ -186,7 +186,7 @@ mrb_value mrb_ossl_rsa_is_private(mrb_state *mrb, mrb_value self)
 {
   EVP_PKEY *pkey;
   GetPKey(self, pkey);
-  return (RSA_PRIVATE(self, pkey->pkey.rsa)) ? mrb_bool_value(true) : mrb_bool_value(false);
+  return (RSA_PRIVATE(self, EVP_PKEY_get0_RSA(pkey))) ? mrb_bool_value(true) : mrb_bool_value(false);
 }
 
 OSSL_PKEY_BN(rsa, n)
